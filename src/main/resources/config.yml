@@ -1,0 +1,14 @@
+# ClanPlugin Configuration
+# ======================
+
+# Database Configuration
+database:
+  host: "localhost"
+  port: 3306
+  database: "clanplugin"
+  username: "clanplugin"
+  password: "root123"
+  pool-size: 10
+  connection-timeout: 30000
+  idle-timeout: 600000
+  max-lifetime: 1800000
