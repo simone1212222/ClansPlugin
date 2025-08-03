@@ -1,4 +1,10 @@
 name: ClansPlugin
-version: '1.0-SNAPSHOT'
+version: '1.0.0'
 main: com.develop.clansPlugin.ClansPlugin
 api-version: '1.21'
+authors: [Simone1212]
+commands:
+  clan:
+    description: Comandi per la gestione del clan
+    usage: /clan
+    permission:
