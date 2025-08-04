@@ -12,3 +12,102 @@ database:
   connection-timeout: 30000
   idle-timeout: 600000
   max-lifetime: 1800000
+
+# Clan Settings
+clan:
+  # Maximum clan name length
+  max-name-length: 16
+  # Maximum tag length
+  max-tag-length: 6
+  # Minimum members required to maintain a clan
+  min-members: 1
+  # Maximum members per clan
+  max-members: 20
+  # Cooldown between clan creations (in seconds)
+  creation-cooldown: 300
+  # Cost to create a clan (requires Vault)
+  creation-cost: 0.0
+
+# Territory Settings
+territory:
+  # Enable territory system
+  enabled: true
+  # Maximum territories per clan
+  max-territories: 5
+  # Territory size (radius in blocks)
+  territory-size: 50
+  # Minimum distance between territories
+  min-distance: 100
+  # Cost per territory claim (requires Vault)
+  claim-cost: 100.0
+  # Auto-protect claimed territories
+  auto-protect: true
+  # Allowed worlds for claiming
+  allowed-worlds:
+    - "world"
+    - "world_nether"
+
+# Chat Settings
+chat:
+  # Clan chat prefix
+  prefix: "&6[CLAN] &r"
+  # Clan chat format
+  format: "&7[%clans_player_tag%&7] &f%player%&7: &f%message%"
+  # Enable clan chat spy for admins
+  spy-enabled: true
+
+# Home Settings
+home:
+  # Teleport delay (in seconds)
+  teleport-delay: 3
+  # Teleport cooldown (in seconds)
+  teleport-cooldown: 300
+  # Cancel teleport on damage
+  cancel-on-damage: true
+  # Cancel teleport on movement
+  cancel-on-movement: true
+
+# Messages
+messages:
+  prefix: "&6[Clan] &r"
+  no-permission: "&cNon hai il permesso per farlo!"
+  player-only: "&cQuesto comando può essere usato solo dai giocatori!"
+  clan-not-found: "&cClan non trovato!"
+  player-not-found: "&cGiocatore non trovato!"
+  not-in-clan: "&cNon fai parte di un clan!"
+  already-in-clan: "&cFai già parte di un clan!"
+  not-leader: "&cDevi essere il leader del clan per farlo!"
+  not-officer: "&cDevi essere un ufficiale o il leader per farlo!"
+
+  # Clan creation/management
+  clan-disbanded: "&eIl clan &6%clan%&e è stato sciolto!"
+  clan-name-taken: "&cQuesto nome clan è già stato preso!"
+  clan-tag-taken: "&cQuesto tag clan è già stato preso!"
+  invalid-name: "&cNome del clan non valido! Usa solo lettere, numeri e underscore."
+  invalid-tag: "&cTag del clan non valido! Usa solo lettere e numeri."
+
+  # Gestione membri
+  player-invited: "&a%player% è stato invitato al clan!"
+  invite-sent: "&aInvito inviato a %player%!"
+  invite-received: "&aSei stato invitato a unirti al clan &6%clan%&a! Usa &f/clan accept&a per accettare."
+  invite-expired: "&cIl tuo invito al clan %clan% è scaduto!"
+  player-joined: "&a%player% è entrato nel clan!"
+  player-left: "&e%player% ha lasciato il clan!"
+  player-kicked: "&c%player% è stato espulso dal clan!"
+  player-promoted: "&a%player% è stato promosso a %role%!"
+  player-demoted: "&e%player% è stato retrocesso a %role%!"
+
+  # Territory
+  territory-claimed: "&aTerritorio rivendicato con successo!"
+  territory-unclaimed: "&eTerritorio liberato!"
+  territory-limit-reached: "&cIl tuo clan ha raggiunto il numero massimo di territori!"
+  territory-too-close: "&cQuesto territorio è troppo vicino a quello di un altro clan!"
+  territory-not-allowed: "&cNon puoi rivendicare territori in questo mondo!"
+  not-in-territory: "&cNon ti trovi in un territorio di clan!"
+
+  # Home
+  home-set: "&aCasa del clan impostata con successo!"
+  home-not-set: "&cLa casa del clan non è stata ancora impostata!"
+  teleporting: "&aTeletrasporto alla casa del clan in %seconds% secondi..."
+  teleport-cancelled: "&cTeletrasporto annullato!"
+  teleport-cooldown: "&cDevi aspettare %time% prima di poterti teletrasportare di nuovo!"

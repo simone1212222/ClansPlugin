@@ -4,6 +4,7 @@ import com.develop.clansPlugin.ClansPlugin;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -36,6 +37,23 @@ public class DatabaseManager {
     }
 
     private void setupDataSource() {
+        HikariConfig hikariConfig = getHikariConfig();
+
+        hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
+        hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+        hikariConfig.addDataSourceProperty("useServerPrepStmts", "true");
+        hikariConfig.addDataSourceProperty("useLocalSessionState", "true");
+        hikariConfig.addDataSourceProperty("rewriteBatchedStatements", "true");
+        hikariConfig.addDataSourceProperty("cacheResultSetMetadata", "true");
+        hikariConfig.addDataSourceProperty("cacheServerConfiguration", "true");
+        hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
+        hikariConfig.addDataSourceProperty("maintainTimeStats", "false");
+
+        this.dataSource = new HikariDataSource(hikariConfig);
+    }
+
+    private @NotNull HikariConfig getHikariConfig() {
         FileConfiguration config = plugin.getConfig();
 
         HikariConfig hikariConfig = new HikariConfig();
@@ -51,23 +69,12 @@ public class DatabaseManager {
         hikariConfig.setConnectionTimeout(config.getLong("database.connection_timeout", 30000));
         hikariConfig.setIdleTimeout(config.getLong("database.idle-timeout", 600000));
         hikariConfig.setMaxLifetime(config.getLong("database.max-lifetime", 1800000));
-
-        hikariConfig.addDataSourceProperty("cachePrepStmts", "true");
-        hikariConfig.addDataSourceProperty("prepStmtCacheSize", "250");
-        hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-        hikariConfig.addDataSourceProperty("useServerPrepStmts", "true");
-        hikariConfig.addDataSourceProperty("useLocalSessionState", "true");
-        hikariConfig.addDataSourceProperty("rewriteBatchedStatements", "true");
-        hikariConfig.addDataSourceProperty("cacheResultSetMetadata", "true");
-        hikariConfig.addDataSourceProperty("cacheServerConfiguration", "true");
-        hikariConfig.addDataSourceProperty("elideSetAutoCommits", "true");
-        hikariConfig.addDataSourceProperty("maintainTimeStats", "false");
-
-        this.dataSource = new HikariDataSource(hikariConfig);
+        return hikariConfig;
     }
+
     private void createTables() throws SQLException {
         String[] queries = {
-                // Clans table
+                // Clan table
                 """
             CREATE TABLE IF NOT EXISTS clans (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -120,7 +127,7 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             """,
 
-                // Territories table
+                // Territory table
                 """
             CREATE TABLE IF NOT EXISTS territories (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -162,7 +169,7 @@ public class DatabaseManager {
 
     public Connection getConnection() throws SQLException {
         if (dataSource == null) {
-            throw new SQLException("DataSource is not initialized!");
+            throw new SQLException("DataSource non inizializzato");
         }
         return dataSource.getConnection();
     }
@@ -170,7 +177,7 @@ public class DatabaseManager {
     public void shutdown() {
         if (dataSource != null && !dataSource.isClosed()) {
             dataSource.close();
-            logger.info("Database connection pool closed.");
+            logger.info("Connessione al database chiusa correttamente.");
         }
     }
 }

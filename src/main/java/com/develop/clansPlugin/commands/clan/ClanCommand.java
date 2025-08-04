@@ -17,6 +17,7 @@ public class ClanCommand extends BaseCommand {
 
         // Register subcommands
         subCommands.put("create", new CreateCommand(plugin));
+        subCommands.put("disband", new DisbandCommand(plugin));
     }
 
     @Override

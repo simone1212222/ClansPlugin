@@ -2,22 +2,91 @@ package com.develop.clansPlugin;
 
 import com.develop.clansPlugin.commands.clan.ClanCommand;
 import com.develop.clansPlugin.database.DatabaseManager;
+import com.develop.clansPlugin.logging.PluginLogger;
+import com.develop.clansPlugin.managers.ClanManager;
+import com.develop.clansPlugin.managers.ConfigManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ClansPlugin extends JavaPlugin {
 
+    private PluginLogger logger;
+    private ConfigManager configManager;
+    private DatabaseManager databaseManager;
+    private ClanManager clanManager;
+
+
     @Override
     public void onEnable() {
 
-        // Initialize config
-        saveDefaultConfig();
-        // Register commands
-        new ClanCommand(this);
-        // Initialize database
-        DatabaseManager databaseManager = new DatabaseManager(this);
+        initializeLogger();
+        loadConfig();
+        if (!initializeDatabase()) return;
+        initializeManagers();
+        registerCommands();
+
+        logger.info("Plugin caricato con successo.");
+    }
+
+    @Override
+    public void onDisable() {
+        databaseShutdown();
+    }
+
+
+    private void loadConfig() {
+        configManager = new ConfigManager(this);
+        configManager.loadConfig();
+        logger.info("Config caricato con successo.");
+    }
+
+    private boolean initializeDatabase() {
+        databaseManager = new DatabaseManager(this);
         if (!databaseManager.initialize()) {
             getLogger().severe("Impossibile inizializzare il database.");
             getServer().getPluginManager().disablePlugin(this);
+            return false;
+        } else {
+            logger.info("Database inizializzato");
+        }
+        return true;
+    }
+
+    private void initializeManagers() {
+        clanManager = new ClanManager(this);
+        logger.info("Managers inizializzati.");
+    }
+
+    private void registerCommands() {
+        new ClanCommand(this);
+        logger.info("Comandi registrati.");
+    }
+
+    private void initializeLogger() {
+        this.logger = new PluginLogger(getLogger());
+        logger.info("Logger inizializzato.");
+    }
+
+    private void databaseShutdown() {
+        if (databaseManager != null) {
+            databaseManager.shutdown();
         }
     }
+
+    // Getters
+    public DatabaseManager getDatabaseManager() {
+        return databaseManager;
+    }
+
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public ClanManager getClanManager() {
+        return clanManager;
+    }
+
+    public PluginLogger getPluginLogger() {
+        return logger;
+    }
+
 }

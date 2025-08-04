@@ -1,25 +1,29 @@
 package com.develop.clansPlugin.commands.base;
 
+import com.develop.clansPlugin.ClansPlugin;
+import com.develop.clansPlugin.logging.PluginLogger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Level;
 
 public abstract class BaseCommand implements CommandExecutor, TabCompleter {
 
-    protected final JavaPlugin plugin;
+    protected final ClansPlugin plugin;
+    protected final PluginLogger logger;
 
-    protected BaseCommand(JavaPlugin plugin) {
+    protected BaseCommand(ClansPlugin plugin) {
         this.plugin = plugin;
+        this.logger = plugin.getPluginLogger();
     }
 
+    // Register Commands
     public void register(String label) {
         var command = Objects.requireNonNull(plugin.getCommand(label),
             () -> "Il comando '" + label + "' non è definito nel plugin.yml.");
@@ -29,7 +33,7 @@ public abstract class BaseCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, Command command, @NotNull String label, String[] args) {
         if (command.getPermission() != null && !sender.hasPermission(command.getPermission())) {
             sender.sendMessage(ChatColor.RED + "Non hai i permessi per eseguire questo comando.");
             return true;
@@ -39,17 +43,17 @@ public abstract class BaseCommand implements CommandExecutor, TabCompleter {
             return executeCommand(sender, args);
         } catch (Exception e) {
             sender.sendMessage(ChatColor.RED + "Si è verificato un errore durante l'esecuzione del comando.");
-            plugin.getLogger().log(Level.SEVERE, "Errore nel comando /" + command.getName(), e);
+            logger.error("Errore nel comando /" + command.getName(), e);
             return true;
         }
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         try {
             return onTabCompleteCommand(sender, args);
         } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Errore nel tab complete del comando /" + command.getName(), e);
+            logger.error("Errore nel tab complete del comando /" + command.getName(), e);
             return Collections.emptyList();
         }
     }
