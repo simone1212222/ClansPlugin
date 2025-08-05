@@ -59,12 +59,12 @@ public class DatabaseManager {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName("org.mariadb.jdbc.Driver");
         hikariConfig.setJdbcUrl(String.format("jdbc:mariadb://%s:%d/%s",
-                config.getString("database.host", "localhost"),
-                config.getInt("database.port", 3306),
-                config.getString("database.database", "clansplugin")));
+                plugin.getConfigManager().getDatabaseHost(),
+                plugin.getConfigManager().getDatabasePort(),
+                plugin.getConfigManager().getDatabaseName()));
 
-        hikariConfig.setUsername(config.getString("database.username", "root"));
-        hikariConfig.setPassword(config.getString("database.password", ""));
+        hikariConfig.setUsername(plugin.getConfigManager().getDatabaseUsername());
+        hikariConfig.setPassword(plugin.getConfigManager().getDatabasePassword());
         hikariConfig.setMaximumPoolSize(config.getInt("database.max_pool_size", 10));
         hikariConfig.setConnectionTimeout(config.getLong("database.connection_timeout", 30000));
         hikariConfig.setIdleTimeout(config.getLong("database.idle-timeout", 600000));

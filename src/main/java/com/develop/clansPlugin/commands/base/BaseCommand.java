@@ -23,7 +23,6 @@ public abstract class BaseCommand implements CommandExecutor, TabCompleter {
         this.logger = plugin.getPluginLogger();
     }
 
-    // Register Commands
     public void register(String label) {
         var command = Objects.requireNonNull(plugin.getCommand(label),
             () -> "Il comando '" + label + "' non è definito nel plugin.yml.");
