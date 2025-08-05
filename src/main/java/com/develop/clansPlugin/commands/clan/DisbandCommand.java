@@ -19,10 +19,7 @@ public class DisbandCommand extends BaseCommand {
     @Override
     public boolean executeCommand(CommandSender sender, String[] args) {
 
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("Questo comando può essere eseguito solo da un giocatore.");
-            return true;
-        }
+        Player player = (Player) sender;
 
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
@@ -38,7 +35,6 @@ public class DisbandCommand extends BaseCommand {
         CompletableFuture<Boolean> future = plugin.getClanManager().disbandClan(clan.getId());
         future.thenAccept(success -> {
             if (success) {
-                // Notify all members
                 for (ClanMember member : clan.getMembers().values()) {
                     Player memberPlayer = member.getPlayer();
                     if (memberPlayer != null && memberPlayer.isOnline()) {

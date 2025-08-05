@@ -4,6 +4,7 @@ import com.develop.clansPlugin.ClansPlugin;
 import com.develop.clansPlugin.commands.base.BaseCommand;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.util.*;
 
@@ -18,16 +19,37 @@ public class ClanCommand extends BaseCommand {
         // Register subcommands
         subCommands.put("create", new CreateCommand(plugin));
         subCommands.put("disband", new DisbandCommand(plugin));
+        subCommands.put("sethome", new SetHomeCommand(plugin));
+        subCommands.put("home", new HomeCommand(plugin));
+        subCommands.put("chat", new ClanChatCommand(plugin));
+        subCommands.put("info", new ClanInfoCommand(plugin));
+        subCommands.put("invite", new InviteCommand(plugin));
+        subCommands.put("accept", new AcceptCommand(plugin));
     }
 
     @Override
     public boolean executeCommand(CommandSender sender, String[] args) {
+
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Questo comando può essere eseguito solo da un giocatore.");
+            return true;
+        }
+
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.GOLD + "========== Comandi Clan ==========");
-            sender.sendMessage(ChatColor.YELLOW + "/clan create <nome>" + ChatColor.GRAY + " - Crea un nuovo clan");
-            sender.sendMessage(ChatColor.YELLOW + "/clan info" + ChatColor.GRAY + " - Info sul tuo clan");
-            sender.sendMessage(ChatColor.YELLOW + "/clan invite <giocatore>" + ChatColor.GRAY + " - Invita qualcuno");
-            sender.sendMessage(ChatColor.GOLD + "==================================");
+            sender.sendMessage("§6=== Comandi Clan ===");
+            sender.sendMessage("§7/clan create <nome> <tag> §f- Crea un nuovo clan");
+            sender.sendMessage("§7/clan disband §f- Sciogli il tuo clan (solo leader)");
+            sender.sendMessage("§7/clan invite <giocatore> §f- Invita un giocatore nel tuo clan");
+            sender.sendMessage("§7/clan kick <giocatore> §f- Espelli un giocatore dal tuo clan");
+            sender.sendMessage("§7/clan promote/demote <giocatore> §f- Gestisci i ruoli dei membri");
+            sender.sendMessage("§7/clan chat <messaggio> §f- Invia un messaggio nella chat del clan");
+            sender.sendMessage("§7/clan claim §f- Rivendica un territorio nella tua posizione");
+            sender.sendMessage("§7/clan home §f- Teletrasportati alla casa del clan");
+            sender.sendMessage("§7/clan sethome §f- Imposta la posizione della casa del clan");
+            sender.sendMessage("§7/clan info [clan] §f- Visualizza le informazioni del clan");
+            sender.sendMessage("§7/clan list §f- Elenca tutti i clan");
+            sender.sendMessage("§7/clan leave §f- Lascia il clan corrente");
+
             return true;
         }
 

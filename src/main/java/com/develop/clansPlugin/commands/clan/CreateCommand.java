@@ -19,21 +19,23 @@ public class CreateCommand extends BaseCommand {
     @Override
     public boolean executeCommand(CommandSender sender, String[] args) {
 
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage("Questo comando può essere eseguito solo da un giocatore.");
+        Player player = (Player) sender;
+
+        if (args.length > 2) {
+            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                    "§8Usa: /clan create <name> <tag>");
             return true;
         }
 
         if (args.length < 2) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
-                    "Usage: /clan create <name> <tag>");
+                    "§8Usa: /clan create <name> <tag>");
             return true;
         }
 
         String name = args[0];
         String tag = args[1];
 
-        // Validation
         if (name.length() > plugin.getConfigManager().getMaxNameLength()) {
             player.sendMessage(plugin.getConfigManager().getMessage("invalid-name"));
             return true;
@@ -54,7 +56,6 @@ public class CreateCommand extends BaseCommand {
             return true;
         }
 
-        // Check if the player is already in a clan
         if (plugin.getClanManager().getPlayerClan(player.getUniqueId()) != null) {
             player.sendMessage(plugin.getConfigManager().getMessage("already-in-clan"));
             return true;
