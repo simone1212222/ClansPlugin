@@ -230,6 +230,122 @@ public class ClanManager {
         });
     }
 
+    public CompletableFuture<Boolean> setHome(int clanId, Location home) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String updateQuery = """
+                    UPDATE clans SET home_world = ?, home_x = ?, home_y = ?, home_z = ?, home_yaw = ?, home_pitch = ?
+                    WHERE id = ?
+                    """;
+
+                try (Connection conn = plugin.getDatabaseManager().getConnection();
+                    PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+                    stmt.setString(1, home.getWorld().getName());
+                    stmt.setDouble(2, home.getX());
+                    stmt.setDouble(3, home.getY());
+                    stmt.setDouble(4, home.getZ());
+                    stmt.setFloat(5, home.getYaw());
+                    stmt.setFloat(6, home.getPitch());
+                    stmt.setInt(7, clanId);
+
+                    boolean successs = stmt.executeUpdate() > 0;
+
+                    if (successs) {
+                        Clan clan = clanCache.get(clanId);
+                        if (clan != null) {
+                            clan.setHome(home);
+                        }
+                    }
+                    return successs;
+                }
+            } catch (SQLException e) {
+                logger.error("Errore durante l'aggiornamento della home del clan", e);
+                return false;
+            }
+        });
+    }
+
+    public void reloadClan(int clanId) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                String query = """
+                    SELECT c.*, cm.id as member_id, cm.player_uuid, cm.player_name, cm.role, cm.joined_at
+                    FROM clans c
+                    LEFT JOIN clan_members cm ON c.id = cm.clan_id
+                    WHERE c.id = ?
+                    ORDER BY cm.id
+                    """;
+
+                try (Connection conn = plugin.getDatabaseManager().getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(query)) {
+
+                    stmt.setInt(1, clanId);
+
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        Clan clan = null;
+
+                        while (rs.next()) {
+                            if (clan == null) {
+                                // Remove old clan from caches
+                                Clan oldClan = clanCache.get(clanId);
+                                if (oldClan != null) {
+                                    clanNameCache.remove(oldClan.getName().toLowerCase());
+                                    clanTagCache.remove(oldClan.getTag().toLowerCase());
+                                    for (ClanMember member : oldClan.getMembers().values()) {
+                                        playerClanCache.remove(member.getPlayerUuid());
+                                    }
+                                }
+
+                                clan = new Clan(
+                                        clanId,
+                                        rs.getString("name"),
+                                        rs.getString("tag"),
+                                        UUID.fromString(rs.getString("leader_uuid")),
+                                        rs.getTimestamp("created_at").toLocalDateTime()
+                                );
+
+                                String homeWorld = rs.getString("home_world");
+                                if (homeWorld != null) {
+                                    Location home = new Location(
+                                            plugin.getServer().getWorld(homeWorld),
+                                            rs.getDouble("home_x"),
+                                            rs.getDouble("home_y"),
+                                            rs.getDouble("home_z"),
+                                            rs.getFloat("home_yaw"),
+                                            rs.getFloat("home_pitch")
+                                    );
+                                    clan.setHome(home);
+                                }
+
+                                clanCache.put(clanId, clan);
+                                clanNameCache.put(clan.getName().toLowerCase(), clanId);
+                                clanTagCache.put(clan.getTag().toLowerCase(), clanId);
+                            }
+
+                            int memberId = rs.getInt("member_id");
+                            if (memberId > 0) {
+                                ClanMember member = new ClanMember(
+                                        memberId,
+                                        clanId,
+                                        UUID.fromString(rs.getString("player_uuid")),
+                                        rs.getString("player_name"),
+                                        ClanRole.fromString(rs.getString("role")),
+                                        rs.getTimestamp("joined_at").toLocalDateTime()
+                                );
+                                clan.addMember(member);
+                                playerClanCache.put(member.getPlayerUuid(), clanId);
+                            }
+                        }
+                    }
+                }
+
+            } catch (SQLException e) {
+                logger.error("Errore durante il caricamento del clan: " + e.getMessage());
+            }
+        });
+    }
+
     // Getter methods
     public Clan getClan(int clanId) {
         return clanCache.get(clanId);
@@ -263,7 +379,6 @@ public class ClanManager {
     }
 
     public void shutdown() {
-        // Clear caches
         clanCache.clear();
         playerClanCache.clear();
         clanNameCache.clear();
