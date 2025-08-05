@@ -60,8 +60,6 @@ chat:
 home:
   # Teleport delay (in seconds)
   teleport-delay: 3
-  # Teleport cooldown (in seconds)
-  teleport-cooldown: 300
   # Cancel teleport on damage
   cancel-on-damage: true
   # Cancel teleport on movement
@@ -80,14 +78,16 @@ messages:
   not-officer: "&cDevi essere un ufficiale o il leader per farlo!"
 
   # Clan creation/management
+  clan-created: '&aClan &6%clan%&a creato con successo!'
   clan-disbanded: "&eIl clan &6%clan%&e è stato sciolto!"
   clan-name-taken: "&cQuesto nome clan è già stato preso!"
   clan-tag-taken: "&cQuesto tag clan è già stato preso!"
   invalid-name: "&cNome del clan non valido! Usa solo lettere, numeri e underscore."
   invalid-tag: "&cTag del clan non valido! Usa solo lettere e numeri."
 
-  # Gestione membri
+  # Clan Member Management
   player-invited: "&a%player% è stato invitato al clan!"
+  already-invited: "&c%player% ha già un invito in sospeso!"
   invite-sent: "&aInvito inviato a %player%!"
   invite-received: "&aSei stato invitato a unirti al clan &6%clan%&a! Usa &f/clan accept&a per accettare."
   invite-expired: "&cIl tuo invito al clan %clan% è scaduto!"
@@ -108,6 +108,7 @@ messages:
   # Home
   home-set: "&aCasa del clan impostata con successo!"
   home-not-set: "&cLa casa del clan non è stata ancora impostata!"
-  teleporting: "&aTeletrasporto alla casa del clan in %seconds% secondi..."
+  teleporting: "&aTeletrasporto alla casa del clan in: "
   teleport-cancelled: "&cTeletrasporto annullato!"
   teleport-cooldown: "&cDevi aspettare %time% prima di poterti teletrasportare di nuovo!"
+  home-teleported: "&aTeletrasportato alla casa del clan!"
