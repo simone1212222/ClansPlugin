@@ -1,0 +1,13 @@
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
