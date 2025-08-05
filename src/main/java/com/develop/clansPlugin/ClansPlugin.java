@@ -3,8 +3,11 @@ package com.develop.clansPlugin;
 import com.develop.clansPlugin.commands.clan.ClanCommand;
 import com.develop.clansPlugin.database.DatabaseManager;
 import com.develop.clansPlugin.logging.PluginLogger;
+import com.develop.clansPlugin.managers.ChatManager;
 import com.develop.clansPlugin.managers.ClanManager;
 import com.develop.clansPlugin.managers.ConfigManager;
+import com.develop.clansPlugin.managers.InviteManager;
+import com.develop.clansPlugin.placeholders.ClanPlaceholders;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class ClansPlugin extends JavaPlugin {
@@ -13,7 +16,8 @@ public final class ClansPlugin extends JavaPlugin {
     private ConfigManager configManager;
     private DatabaseManager databaseManager;
     private ClanManager clanManager;
-
+    private ChatManager chatManager;
+    private InviteManager inviteManager;
 
     @Override
     public void onEnable() {
@@ -23,6 +27,7 @@ public final class ClansPlugin extends JavaPlugin {
         if (!initializeDatabase()) return;
         initializeManagers();
         registerCommands();
+        registerPlaceholders();
 
         logger.info("Plugin caricato con successo.");
     }
@@ -53,6 +58,8 @@ public final class ClansPlugin extends JavaPlugin {
 
     private void initializeManagers() {
         clanManager = new ClanManager(this);
+        chatManager = new ChatManager(this);
+        inviteManager = new InviteManager(this);
         logger.info("Managers inizializzati.");
     }
 
@@ -65,6 +72,14 @@ public final class ClansPlugin extends JavaPlugin {
         this.logger = new PluginLogger(getLogger());
         logger.info("Logger inizializzato.");
     }
+
+    private void registerPlaceholders() {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new ClanPlaceholders(this).register();
+            getLogger().info("Placeholders registrati.");
+        }
+    }
+
 
     private void databaseShutdown() {
         if (databaseManager != null) {
@@ -89,4 +104,10 @@ public final class ClansPlugin extends JavaPlugin {
         return logger;
     }
 
+    public ChatManager getChatManager() {
+        return chatManager;
+    }
+    public InviteManager getInviteManager() {
+        return inviteManager;
+    }
 }
