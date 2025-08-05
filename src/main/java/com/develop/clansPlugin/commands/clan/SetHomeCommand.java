@@ -7,10 +7,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
-public class ClanChatCommand extends BaseCommand {
+public class SetHomeCommand extends BaseCommand {
 
-    protected ClanChatCommand(ClansPlugin plugin) {
+    protected SetHomeCommand(ClansPlugin plugin) {
         super(plugin);
     }
 
@@ -25,16 +26,22 @@ public class ClanChatCommand extends BaseCommand {
             return true;
         }
 
-        if (args.length == 0) {
-            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
-                        "§8Usa: /clan chat <messaggio>");
+        if (!clan.isLeader(player.getUniqueId())) {
+            player.sendMessage(plugin.getConfigManager().getMessage("not-leader"));
             return true;
         }
 
+        CompletableFuture<Boolean> future = plugin.getClanManager()
+                .setHome(clan.getId(), player.getLocation());
 
-        String message = String.join(" ", args);
-
-        plugin.getChatManager().sendClanMessage(player, message);
+        future.thenAccept(success -> {
+            if (success) {
+                player.sendMessage(plugin.getConfigManager().getMessage("home-set"));
+            } else {
+                player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                        "§cImpossibile impostare la home del clan.");
+            }
+        });
         return true;
     }
 
