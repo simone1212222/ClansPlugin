@@ -7,11 +7,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Set;
 
 public class ConfigManager {
 
@@ -30,34 +28,16 @@ public class ConfigManager {
         if (!configFile.exists()) {
             plugin.saveResource("config.yml", false);
         }
+
         config = YamlConfiguration.loadConfiguration(configFile);
 
-        InputStream defaultConfigStream = plugin.getResource("config.yml");
-        if (defaultConfigStream != null) {
-            YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(
-                    new InputStreamReader(defaultConfigStream)
-            );
-
-            boolean changed = false;
-            Set<String> keys = defaultConfig.getKeys(true);
-            for (String key : keys) {
-                if (!config.contains(key)) {
-                    Object defValue = defaultConfig.get(key);
-                    logger.warn("Il file di configurazione non contiene la chiave '" + key + "', impostando il valore di default a '" + defValue + "'");
-                    changed = true;
-                }
-            }
-
-            if (changed) {
-                try {
-                    config.save(new File(plugin.getDataFolder(), "config.yml"));
-                    logger.info("File di configurazione aggiornato");
-                } catch (IOException e) {
-                    logger.error("Errore durante la salvataggia del file di configurazione", e);
-                }
-            }
-            } else {
-                logger.error("Impossibile trovare config.yml");
+        InputStream defaultStream = plugin.getResource("config.yml");
+        if (defaultStream != null) {
+            YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
+            config.setDefaults(defaultConfig);
+            config.options().copyDefaults(true);
+        } else {
+                logger.error("Impossibile caricare il config.yml");
             }
         }
 
@@ -71,6 +51,7 @@ public class ConfigManager {
     public boolean isDatabaseEnabled() {
         return config.getBoolean("database.enabled", true);
     }
+
     public String getDatabaseHost() {
         return config.getString("database.host", "localhost");
     }
@@ -179,8 +160,24 @@ public class ConfigManager {
 
     // Messages
     public String getMessage(String key) {
-        return colorize(config.getString("messages." + key, "Messaggio non trovato: " + key));
+        String path = "messages." + key;
+
+        assert config.getRoot() != null;
+        if (config.getRoot().get(path, null) != null) {
+            return colorize(config.getString(path));
+        }
+
+        if (config.getDefaults() != null && config.getDefaults().contains(path)) {
+            String defValue = config.getDefaults().getString(path);
+            logger.warn("Chiave mancante nel config.yml: '" + path + "' → imposto il valore di default: '" + defValue + "'");
+            return colorize(defValue);
+        }
+
+        logger.warn("Chiave '" + path + "' non trovata né nel config né nei defaults");
+        return "Messaggio non trovato: " + key;
     }
+
+
 
     public String getMessage(String key, String... replacements) {
         String message = getMessage(key);
