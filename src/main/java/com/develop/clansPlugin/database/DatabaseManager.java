@@ -155,6 +155,20 @@ public class DatabaseManager {
                 INDEX idx_clan (clan_id),
                 INDEX idx_name (player_name)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+            """,
+
+                // Clan settings table
+                """
+            CREATE TABLE IF NOT EXISTS clan_settings (
+                clan_id INT PRIMARY KEY,
+                allow_build BOOLEAN NOT NULL DEFAULT TRUE,
+                allow_pvp BOOLEAN NOT NULL DEFAULT FALSE,
+                allow_mob_spawning BOOLEAN NOT NULL DEFAULT FALSE,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                updated_by CHAR(36) NOT NULL,
+                FOREIGN KEY (clan_id) REFERENCES clans(id) ON DELETE CASCADE,
+                INDEX idx_clan_settings (clan_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
             """
         };
 

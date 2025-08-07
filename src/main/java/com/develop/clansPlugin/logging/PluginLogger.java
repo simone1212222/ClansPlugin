@@ -27,7 +27,4 @@ public class PluginLogger {
         logger.log(Level.SEVERE, message, throwable);
     }
 
-    public void debug(String message) {
-        logger.log(Level.FINE, "[DEBUG] " + message);
-    }
 }

@@ -48,9 +48,6 @@ public class ConfigManager {
 
 
     // Database settings
-    public boolean isDatabaseEnabled() {
-        return config.getBoolean("database.enabled", true);
-    }
 
     public String getDatabaseHost() {
         return config.getString("database.host", "localhost");
@@ -82,26 +79,10 @@ public class ConfigManager {
         return config.getInt("clan.max-tag-length", 6);
     }
 
-    public int getMinMembers() {
-        return config.getInt("clan.min-members", 1);
-    }
-
-    public int getMaxMembers() {
-        return config.getInt("clan.max-members", 20);
-    }
-
-    public int getCreationCooldown() {
-        return config.getInt("clan.creation-cooldown", 300);
-    }
-
-    public double getCreationCost() {
-        return config.getDouble("clan.creation-cost", 0.0);
-    }
-
 
     // Territory settings
     public boolean isTerritoryEnabled() {
-        return config.getBoolean("territory.enabled", true);
+        return !config.getBoolean("territory.enabled", true);
     }
 
     public int getMaxTerritories() {
@@ -116,12 +97,8 @@ public class ConfigManager {
         return config.getInt("territory.min-distance", 100);
     }
 
-    public double getClaimCost() {
-        return config.getDouble("territory.claim-cost", 100.0);
-    }
-
     public boolean isAutoProtect() {
-        return config.getBoolean("territory.auto-protect", true);
+        return !config.getBoolean("territory.auto-protect", true);
     }
 
     public List<String> getAllowedWorlds() {
@@ -144,18 +121,6 @@ public class ConfigManager {
     // Home settings
     public int getTeleportDelay() {
         return config.getInt("home.teleport-delay", 3);
-    }
-
-    public int getTeleportCooldown() {
-        return config.getInt("home.teleport-cooldown", 300);
-    }
-
-    public boolean isCancelOnDamage() {
-        return config.getBoolean("home.cancel-on-damage", true);
-    }
-
-    public boolean isCancelOnMovement() {
-        return config.getBoolean("home.cancel-on-movement", true);
     }
 
     // Messages
@@ -181,6 +146,7 @@ public class ConfigManager {
 
     public String getMessage(String key, String... replacements) {
         String message = getMessage(key);
+        message = message.replace("{", "").replace("}", "");
         for (int i = 0; i < replacements.length; i += 2) {
             if (i + 1 < replacements.length) {
                 message = message.replace(replacements[i], replacements[i + 1]);
@@ -193,8 +159,5 @@ public class ConfigManager {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
-    public FileConfiguration getConfig() {
-        return config;
-    }
 }
 

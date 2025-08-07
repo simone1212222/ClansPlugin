@@ -36,7 +36,7 @@ public class InviteManager {
                     return null;
                 }
 
-                LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10); // 10 minute expiry
+                LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(10);
 
                 String insertQuery = """
                     INSERT INTO clan_invites (clan_id, inviter_uuid, invited_uuid, invited_name, expires_at)
@@ -102,12 +102,12 @@ public class InviteManager {
                     try (PreparedStatement stmt = conn.prepareStatement(insertMemberQuery)) {
                         stmt.setInt(1, clanId);
                         stmt.setString(2, playerUuid.toString());
-                        stmt.setString(3, invite.getInvitedName());
+                        stmt.setString(3, invite.invitedName());
                         stmt.executeUpdate();
                     }
 
                     try (PreparedStatement stmt = conn.prepareStatement(deleteInviteQuery)) {
-                        stmt.setInt(1, invite.getId());
+                        stmt.setInt(1, invite.id());
                         stmt.executeUpdate();
                     }
 
@@ -142,7 +142,7 @@ public class InviteManager {
 
     public ClanInvite getActiveInvite(UUID playerUuid, int clanId) {
         return getPlayerInvites(playerUuid).stream()
-                .filter(invite -> invite.getClanId() == clanId)
+                .filter(invite -> invite.clanId() == clanId)
                 .findFirst()
                 .orElse(null);
     }
@@ -152,12 +152,12 @@ public class InviteManager {
     }
 
     private void removeInviteFromCache(ClanInvite invite) {
-        inviteCache.remove(invite.getId());
-        List<ClanInvite> invites = playerInvites.get(invite.getInvitedUuid());
+        inviteCache.remove(invite.id());
+        List<ClanInvite> invites = playerInvites.get(invite.invitedUuid());
         if (invites != null) {
             invites.remove(invite);
             if (invites.isEmpty()) {
-                playerInvites.remove(invite.getInvitedUuid());
+                playerInvites.remove(invite.invitedUuid());
             }
         }
     }
@@ -194,8 +194,4 @@ public class InviteManager {
         }
     }
 
-    public void shutdown() {
-        inviteCache.clear();
-        playerInvites.clear();
-    }
 }
