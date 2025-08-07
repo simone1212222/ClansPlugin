@@ -187,6 +187,8 @@ public class ClanManager {
                     clanTagCache.put(tag.toLowerCase(), clanId);
                     playerClanCache.put(leader.getUniqueId(), clanId);
 
+                    plugin.getSettingsManager().createDefaultSettings(clanId, leader.getUniqueId());
+
                     return clan;
 
                 }
@@ -209,10 +211,11 @@ public class ClanManager {
                     boolean success = stmt.executeUpdate() > 0;
 
                     if (success) {
-                        // Remove from caches
                         Clan clan = clanCache.remove(clanId);
                         if (clan != null) {
-                            clanNameCache.remove(clan.getName().toLowerCase());
+                            plugin.getTerritoryManager().removeAllClanTerritories(clanId);
+                            plugin.getSettingsManager().removeClanSettings(clanId);
+                            clanNameCache.remove(clan.getName().toLowerCase()   );
                             clanTagCache.remove(clan.getTag().toLowerCase());
                             for (ClanMember member : clan.getMembers().values()) {
                                 playerClanCache.remove(member.getPlayerUuid());
@@ -241,7 +244,7 @@ public class ClanManager {
                 try (Connection conn = plugin.getDatabaseManager().getConnection();
                     PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
 
-                    stmt.setString(1, home.getWorld().getName());
+                    stmt.setString(1, Objects.requireNonNull(home.getWorld()).getName());
                     stmt.setDouble(2, home.getX());
                     stmt.setDouble(3, home.getY());
                     stmt.setDouble(4, home.getZ());
@@ -346,6 +349,72 @@ public class ClanManager {
         });
     }
 
+    public CompletableFuture<Boolean> kickMember(int clanId, UUID playerUuid) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String deleteQuery = "DELETE FROM clan_members WHERE clan_id = ? AND player_uuid = ?";
+
+                try (Connection conn = plugin.getDatabaseManager().getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(deleteQuery)) {
+
+                    stmt.setInt(1, clanId);
+                    stmt.setString(2, playerUuid.toString());
+                    boolean success = stmt.executeUpdate() > 0;
+
+                    if (success) {
+                        // Update cache
+                        Clan clan = clanCache.get(clanId);
+                        if (clan != null) {
+                            clan.removeMember(playerUuid);
+                            playerClanCache.remove(playerUuid);
+                        }
+                    }
+
+                    return success;
+                }
+
+            } catch (SQLException e) {
+                logger.error("Errore durante il kick di un membro dal clan: " + e.getMessage());
+                return false;
+            }
+        });
+    }
+
+    public CompletableFuture<Boolean> promoteMember(int clanId, UUID playerUuid, ClanRole newRole) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String updateQuery = "UPDATE clan_members SET role = ? WHERE clan_id = ? AND player_uuid = ?";
+
+                try (Connection conn = plugin.getDatabaseManager().getConnection();
+                     PreparedStatement stmt = conn.prepareStatement(updateQuery)) {
+
+                    stmt.setString(1, newRole.name());
+                    stmt.setInt(2, clanId);
+                    stmt.setString(3, playerUuid.toString());
+                    boolean success = stmt.executeUpdate() > 0;
+
+                    if (success) {
+                        // Update cache
+                        Clan clan = clanCache.get(clanId);
+                        if (clan != null) {
+                            ClanMember member = clan.getMember(playerUuid);
+                            if (member != null) {
+                                member.setRole(newRole);
+                            }
+                        }
+                    }
+
+                    return success;
+                }
+
+            } catch (SQLException e) {
+                logger.error("Errore durante la promozione di un membro: " + e.getMessage());
+                return false;
+            }
+        });
+    }
+
+
     // Getter methods
     public Clan getClan(int clanId) {
         return clanCache.get(clanId);
@@ -353,11 +422,6 @@ public class ClanManager {
 
     public Clan getClanByName(String name) {
         Integer clanId = clanNameCache.get(name.toLowerCase());
-        return clanId != null ? clanCache.get(clanId) : null;
-    }
-
-    public Clan getClanByTag(String tag) {
-        Integer clanId = clanTagCache.get(tag.toLowerCase());
         return clanId != null ? clanCache.get(clanId) : null;
     }
 
@@ -378,10 +442,4 @@ public class ClanManager {
         return new ArrayList<>(clanCache.values());
     }
 
-    public void shutdown() {
-        clanCache.clear();
-        playerClanCache.clear();
-        clanNameCache.clear();
-        clanTagCache.clear();
-    }
 }
