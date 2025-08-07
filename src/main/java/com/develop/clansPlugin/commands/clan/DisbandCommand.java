@@ -21,6 +21,12 @@ public class DisbandCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        if (args.length > 0) {
+            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                    "§8Usa: /clan disband");
+            return true;
+        }
+
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));

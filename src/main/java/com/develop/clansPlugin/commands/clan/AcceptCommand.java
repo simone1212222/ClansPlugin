@@ -21,6 +21,12 @@ public class AcceptCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        if (args.length > 0) {
+            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                    "§8Usa: /clan accept");
+            return true;
+        }
+
         if (plugin.getClanManager().getPlayerClan(player.getUniqueId()) != null) {
             player.sendMessage(plugin.getConfigManager().getMessage("already-in-clan"));
             return true;
@@ -33,11 +39,11 @@ public class AcceptCommand extends BaseCommand {
         }
 
         var invite = invites.getFirst();
-        CompletableFuture<Boolean> future = plugin.getInviteManager().acceptInvite(player.getUniqueId(), invite.getClanId());
+        CompletableFuture<Boolean> future = plugin.getInviteManager().acceptInvite(player.getUniqueId(), invite.clanId());
 
         future.thenAccept(success -> {
             if (success) {
-                Clan clan = plugin.getClanManager().getClan(invite.getClanId());
+                Clan clan = plugin.getClanManager().getClan(invite.clanId());
                 player.sendMessage(plugin.getConfigManager().getMessage("player-joined",
                         "%player%", player.getName()));
 
@@ -49,8 +55,6 @@ public class AcceptCommand extends BaseCommand {
                                     "%player%", player.getName()));
                         }
                     }
-                } else {
-                    // TODO: expired clan invite...
                 }
             }
         });

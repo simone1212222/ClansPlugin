@@ -21,9 +21,13 @@ public class InviteCommand extends BaseCommand{
     public boolean executeCommand(CommandSender sender, String[] args) {
         Player player = (Player) sender;
 
-        if (args.length < 1) {
+        if (args.length > 2) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
-                    "Usage: /clan invite <player>");
+                    "§8Usage: /clan invite <player>");
+            return true;
+        } else if (args.length < 1) {
+            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                    "§8Usage: /clan invite <player>");
             return true;
         }
 
@@ -67,6 +71,21 @@ public class InviteCommand extends BaseCommand{
 
     @Override
     public List<String> onTabCompleteCommand(CommandSender sender, String[] args) {
+
+        Player player = (Player) sender;
+
+        if (args.length == 1) {
+            Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
+            if (clan == null) return List.of();
+
+            return plugin.getServer().getOnlinePlayers().stream()
+                    .filter(p -> !p.getUniqueId().equals(player.getUniqueId()))
+                    .filter(p -> plugin.getClanManager().getPlayerClan(p.getUniqueId()) == null)
+                    .filter(p -> !plugin.getInviteManager().hasActiveInvite(clan.getId(), p.getUniqueId()))
+                    .map(Player::getName)
+                    .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                    .toList();
+        }
         return List.of();
     }
 }

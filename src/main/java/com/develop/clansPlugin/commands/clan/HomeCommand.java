@@ -20,6 +20,13 @@ public class HomeCommand extends BaseCommand {
     public boolean executeCommand(CommandSender sender, String[] args) {
 
         Player player = (Player) sender;
+
+        if (args.length > 0) {
+            player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
+                    "§8Usa: /clan home");
+            return true;
+        }
+
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
 
         if (clan == null) {
@@ -36,7 +43,9 @@ public class HomeCommand extends BaseCommand {
         int delay = plugin.getConfigManager().getTeleportDelay();
         final int[] secondsFelt = {delay};
 
-        player.sendMessage(plugin.getConfigManager().getMessage("teleporting"));
+        if (secondsFelt[0] != 0){
+            player.sendMessage(plugin.getConfigManager().getMessage("teleporting"));
+        }
 
         plugin.getServer().getScheduler().runTaskTimer(plugin, task -> {
             if (secondsFelt[0] <= 0) {
@@ -50,7 +59,6 @@ public class HomeCommand extends BaseCommand {
         }, 20L, 20L);
         return true;
     }
-    // TODO: Fare un sistema home safe
     @Override
     public List<String> onTabCompleteCommand(CommandSender sender, String[] args) {
         return List.of();

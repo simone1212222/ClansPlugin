@@ -51,7 +51,7 @@ public class CreateCommand extends BaseCommand {
             return true;
         }
 
-        if (!tag.matches("[a-zA-Z0-9]+")) {
+        if (!tag.matches("[a-zA-Z0-9_]+")) {
             player.sendMessage(plugin.getConfigManager().getMessage("invalid-tag"));
             return true;
         }
@@ -64,7 +64,7 @@ public class CreateCommand extends BaseCommand {
         CompletableFuture<Clan> future = plugin.getClanManager().createClan(name, tag, player);
         future.thenAccept(clan -> {
             if (clan == null) {
-                player.sendMessage(plugin.getConfigManager().getMessage("clan-name-taken"));
+                player.sendMessage(plugin.getConfigManager().getMessage("clan-name-or-tag-taken"));
             } else {
                 player.sendMessage(plugin.getConfigManager().getMessage("clan-created",
                         "%clan%", clan.getName()));
