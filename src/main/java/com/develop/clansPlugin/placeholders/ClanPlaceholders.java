@@ -43,21 +43,17 @@ public class ClanPlaceholders extends PlaceholderExpansion {
 
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
 
-        switch (params.toLowerCase()) {
-            case "player_clan":
-                return clan != null ? clan.getName() : "";
-
-            case "player_tag":
-                return clan != null ? clan.getTag() : "";
-
-            case "player_role":
+        return switch (params.toLowerCase()) {
+            case "player_clan" -> clan != null ? clan.getName() : "";
+            case "player_tag" -> clan != null ? clan.getTag() : "";
+            case "player_role" -> {
                 if (clan != null) {
                     ClanMember member = clan.getMember(player.getUniqueId());
-                    return member != null ? member.getRole().getDisplayName() : "";
+                    yield member != null ? member.getRole().getDisplayName() : "";
                 }
-                return "";
-
-        }
-        return null;
+                yield "";
+            }
+            default -> null;
+        };
     }
 }
