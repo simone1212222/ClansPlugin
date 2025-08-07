@@ -17,18 +17,6 @@ public enum ClanRole {
         return displayName;
     }
 
-    public int getPriority() {
-        return priority;
-    }
-
-    public boolean canPromote(ClanRole targetRole) {
-        return this.priority > targetRole.priority;
-    }
-
-    public boolean canDemote(ClanRole targetRole) {
-        return this.priority > targetRole.priority;
-    }
-
     public boolean canKick(ClanRole targetRole) {
         return this.priority > targetRole.priority;
     }

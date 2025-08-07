@@ -27,7 +27,6 @@ public class Clan {
     public int getId() { return id; }
     public String getName() { return name; }
     public String getTag() { return tag; }
-    public UUID getLeaderUuid() { return leaderUuid; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public Location getHome() { return home; }
     public Map<UUID, ClanMember> getMembers() { return members; }
@@ -75,15 +74,6 @@ public class Clan {
 
     public boolean isLeader(UUID playerUuid) {
         return leaderUuid.equals(playerUuid);
-    }
-
-    public boolean isOfficer(UUID playerUuid) {
-        ClanMember member = getMember(playerUuid);
-        return member != null && member.getRole() == ClanRole.OFFICER;
-    }
-
-    public boolean isOfficerOrLeader(UUID playerUuid) {
-        return isLeader(playerUuid) || isOfficer(playerUuid);
     }
 
     @Override

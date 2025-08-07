@@ -11,7 +11,7 @@ public class ClanMember {
     private final int id;
     private final int clanId;
     private final UUID playerUuid;
-    private String playerName;
+    private final String playerName;
     private ClanRole role;
     private final LocalDateTime joinedAt;
 
@@ -33,7 +33,6 @@ public class ClanMember {
     public LocalDateTime getJoinedAt() { return joinedAt; }
 
     // Setters
-    public void setPlayerName(String playerName) { this.playerName = playerName; }
     public void setRole(ClanRole role) { this.role = role; }
 
     // Utility methods
@@ -44,11 +43,6 @@ public class ClanMember {
     public boolean isOnline() {
         Player player = getPlayer();
         return player != null && player.isOnline();
-    }
-
-    public boolean hasPermission(String permission) {
-        Player player = getPlayer();
-        return player != null && player.hasPermission(permission);
     }
 
     public boolean canInvite() {
@@ -64,7 +58,7 @@ public class ClanMember {
     }
 
     public boolean canManageTerritory() {
-        return role == ClanRole.LEADER || role == ClanRole.OFFICER;
+        return role != ClanRole.LEADER && role != ClanRole.OFFICER;
     }
 
     @Override
