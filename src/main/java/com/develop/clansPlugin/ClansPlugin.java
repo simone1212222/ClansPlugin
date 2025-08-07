@@ -2,11 +2,9 @@ package com.develop.clansPlugin;
 
 import com.develop.clansPlugin.commands.clan.ClanCommand;
 import com.develop.clansPlugin.database.DatabaseManager;
+import com.develop.clansPlugin.listeners.clan.ClaimListener;
 import com.develop.clansPlugin.logging.PluginLogger;
-import com.develop.clansPlugin.managers.ChatManager;
-import com.develop.clansPlugin.managers.ClanManager;
-import com.develop.clansPlugin.managers.ConfigManager;
-import com.develop.clansPlugin.managers.InviteManager;
+import com.develop.clansPlugin.managers.*;
 import com.develop.clansPlugin.placeholders.ClanPlaceholders;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -18,6 +16,8 @@ public final class ClansPlugin extends JavaPlugin {
     private ClanManager clanManager;
     private ChatManager chatManager;
     private InviteManager inviteManager;
+    private TerritoryManager territoryManager;
+    private SettingsManager settingsManager;
 
     @Override
     public void onEnable() {
@@ -28,6 +28,7 @@ public final class ClansPlugin extends JavaPlugin {
         initializeManagers();
         registerCommands();
         registerPlaceholders();
+        registerListeners();
 
         logger.info("Plugin caricato con successo.");
     }
@@ -60,6 +61,9 @@ public final class ClansPlugin extends JavaPlugin {
         clanManager = new ClanManager(this);
         chatManager = new ChatManager(this);
         inviteManager = new InviteManager(this);
+        territoryManager = new TerritoryManager(this);
+        clanManager = new ClanManager(this);
+        settingsManager = new SettingsManager(this);
         logger.info("Managers inizializzati.");
     }
 
@@ -80,7 +84,10 @@ public final class ClansPlugin extends JavaPlugin {
         }
     }
 
-
+    private void registerListeners() {
+        getServer().getPluginManager().registerEvents(new ClaimListener(this), this);
+        getLogger().info("Listener registrati.");
+    }
     private void databaseShutdown() {
         if (databaseManager != null) {
             databaseManager.shutdown();
@@ -107,7 +114,16 @@ public final class ClansPlugin extends JavaPlugin {
     public ChatManager getChatManager() {
         return chatManager;
     }
+
     public InviteManager getInviteManager() {
         return inviteManager;
+    }
+
+    public TerritoryManager getTerritoryManager() {
+        return territoryManager;
+    }
+
+    public SettingsManager getSettingsManager() {
+        return settingsManager;
     }
 }
