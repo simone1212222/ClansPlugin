@@ -7,6 +7,5 @@ commands:
   clan:
     description: Comandi per la gestione del clan
     usage: /clan
-    permission:
 softdepend:
   - PlaceholderAPI
