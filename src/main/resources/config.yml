@@ -68,6 +68,7 @@ messages:
   player-got-kicked: "&cSei stato esplulso dal clan: &6%clan%&a"
   no-invites: "&cNon hai inviti da nessun clan"
   not-enough-right: "&cNon hai i diritti per espellere"
+  cant-leave-as-leader: "&cNon puoi lasciare il tuo stesso clan fai &e/clan disband"
 
   # Clan creation/management
   clan-created: '&aClan &6%clan%&a creato con successo!'
@@ -97,6 +98,7 @@ messages:
   not-in-territory: "&cNon ti trovi in un territorio di clan!"
   territory-system-disabled: "&cIl sistema dei clan è disabilitato"
   territory-already-claimed: "&cQuesto territorio è stato già stato claimato"
+  pvp-disabled: '&cNon puoi combattere in questo territorio!'
 
   # Home
   home-set: "&aCasa del clan impostata con successo!"
