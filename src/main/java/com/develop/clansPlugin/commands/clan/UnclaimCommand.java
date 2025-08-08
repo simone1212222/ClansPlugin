@@ -22,39 +22,46 @@ public class UnclaimCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length > 0) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan claim");
             return true;
         }
 
+        // Controlla se il sistema dei territori sia abilitato
         if (plugin.getConfigManager().isTerritoryEnabled()) {
             player.sendMessage(plugin.getConfigManager().getMessage("territory-system-disabled"));
         }
 
+        // Controlla se il player e' in un clan
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return true;
         }
 
+        // Controlla se il player e' almeno officer
         ClanMember member = clan.getMember(player.getUniqueId());
         if (member.canManageTerritory()) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-officer"));
             return true;
         }
 
+        // Controlla se il player ha claimato il territorio presente
         Territory territory = plugin.getTerritoryManager().getTerritoryAt(player.getLocation());
         if (territory == null || territory.clanId() != clan.getId()) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-territory"));
             return true;
         }
 
+        // Unclaima il territorio
         CompletableFuture<Boolean> future = plugin.getTerritoryManager()
                 .unclaimTerritory(territory.id());
 
         future.thenAccept(success -> {
             if (success) {
+                // Notifica il player che ha unclaimato il territorio
                 player.sendMessage(plugin.getConfigManager().getMessage("territory-unclaimed"));
             } else {
                 player.sendMessage(plugin.getConfigManager().getMessage("prefix") +

@@ -14,6 +14,7 @@ public class ReloadCommand extends BaseCommand {
 
     @Override
     public boolean executeCommand(CommandSender sender, String[] args) {
+        // Trova il config e lo ricarica
         plugin.getConfigManager().reloadConfig();
         sender.sendMessage("§aConfig ricaricato con successo!");
         return true;

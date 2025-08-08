@@ -21,18 +21,21 @@ public class SettingsCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        // Controlla se il player e' in un clan
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return true;
         }
 
+        // Controlla se il player sia almeno officer
         ClanMember member = clan.getMember(player.getUniqueId());
         if (member.canManageTerritory()) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-officer"));
             return true;
         }
 
+        // Controlla se i settings esistano e gli invia il messaggio di help
         if (args.length == 0) {
             var settings = plugin.getSettingsManager().getClanSettings(clan.getId());
             if (settings == null) {
@@ -49,6 +52,7 @@ public class SettingsCommand extends BaseCommand {
             return true;
         }
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length < 2) {
             player.sendMessage("§cUsage: /clan settings <build/pvp/mobs> <true/false>");
             return true;
@@ -57,11 +61,13 @@ public class SettingsCommand extends BaseCommand {
         String setting = args[0].toLowerCase();
         String valueStr = args[1].toLowerCase();
 
+        // Controlla se il settings selezionato esiste
         if (!setting.matches("build|pvp|mobs|mobspawning")) {
             player.sendMessage("§cImpostazione invalida! Usa: build, pvp, or mobs");
             return true;
         }
 
+        // Controlla se il value selezionato esiste
         if (!valueStr.matches("true|false|on|off|enable|disable")) {
             player.sendMessage("§cImpostazione invalida! Usa: true/false, on/off, or enable/disable");
             return true;
@@ -69,11 +75,13 @@ public class SettingsCommand extends BaseCommand {
 
         boolean value = valueStr.matches("true|on|enable");
 
+        // Updata i settings
         CompletableFuture<Boolean> future = plugin.getSettingsManager()
                 .updateSetting(clan.getId(), setting, value, player.getUniqueId());
 
         future.thenAccept(success -> {
             if (success) {
+
                 String settingName = switch (setting) {
                     case "build" -> "Build";
                     case "pvp" -> "PvP";
@@ -85,6 +93,7 @@ public class SettingsCommand extends BaseCommand {
                 player.sendMessage("§6[Clan] §f" + settingName + " è stato " + status + "§f!");
 
                 for (ClanMember clanMember : clan.getOnlineMembers()) {
+                    // Notifica i player
                     Player memberPlayer = clanMember.getPlayer();
                     if (memberPlayer != null && !memberPlayer.equals(player)) {
                         memberPlayer.sendMessage("§6[Clan] §7" + player.getName() +

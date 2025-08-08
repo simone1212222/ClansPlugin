@@ -42,6 +42,7 @@ public class SettingsManager {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
+            // Pulisce la cache prima di caricare i settings
             settingsCache.clear();
 
             while (rs.next()) {
@@ -59,6 +60,7 @@ public class SettingsManager {
         }
     }
 
+    // Aggiorna un setting di un clan (build, pvp, mobs)
     public CompletableFuture<Boolean> updateSetting(int clanId, String setting, boolean value, UUID updatedBy) {
         return CompletableFuture.supplyAsync(() -> {
             try {
@@ -71,6 +73,7 @@ public class SettingsManager {
 
                 if (column == null) return false;
 
+                // Query da updatare
                 String updateQuery = String.format(
                         "UPDATE clan_settings SET %s = ?, updated_by = ?, updated_at = CURRENT_TIMESTAMP WHERE clan_id = ?",
                         column
@@ -83,9 +86,11 @@ public class SettingsManager {
                     stmt.setString(2, updatedBy.toString());
                     stmt.setInt(3, clanId);
 
+                    // Update i dati
                     boolean success = stmt.executeUpdate() > 0;
 
                     if (success) {
+                        // Aggiorna la cache solo se esiste
                         ClanSettings settings = settingsCache.get(clanId);
                         if (settings != null) {
                             switch (setting.toLowerCase()) {
@@ -107,9 +112,11 @@ public class SettingsManager {
         });
     }
 
+    // Crea i settings di default del clan
     public void createDefaultSettings(int clanId, UUID createdBy) {
         CompletableFuture.supplyAsync(() -> {
             try {
+                // Query da creare al database
                 String insertQuery = """
                         INSERT INTO clan_settings (clan_id, updated_by) VALUES (?, ?)
                         ON DUPLICATE KEY UPDATE updated_by = VALUES(updated_by)
@@ -121,9 +128,11 @@ public class SettingsManager {
                     stmt.setInt(1, clanId);
                     stmt.setString(2, createdBy.toString());
 
+                    // Crea la query
                     boolean success = stmt.executeUpdate() > 0;
 
                     if (success) {
+                        // e la inserisce
                         ClanSettings settings = new ClanSettings(clanId, createdBy);
                         settingsCache.put(clanId, settings);
                     }

@@ -22,13 +22,13 @@ public final class ClansPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
 
-        initializeLogger();
-        loadConfig();
-        if (!initializeDatabase()) return;
-        initializeManagers();
-        registerCommands();
-        registerPlaceholders();
-        registerListeners();
+        initializeLogger(); // Registra il logger
+        loadConfig(); // Carica il config
+        if (!initializeDatabase()) return; // Carica inizializza database
+        initializeManagers(); // Inizializza managers
+        registerCommands(); // Registra i comandi
+        registerPlaceholders(); // Registra i placeholders
+        registerListeners(); // Registra i listeners
 
         logger.info("Plugin caricato con successo.");
     }
@@ -38,13 +38,14 @@ public final class ClansPlugin extends JavaPlugin {
         databaseShutdown();
     }
 
-
+    // Carica il config se non esiste
     private void loadConfig() {
         configManager = new ConfigManager(this);
         configManager.loadConfig();
         logger.info("Config caricato con successo.");
     }
 
+    // Carica inizializza database, stoppa il plugin se fallisce
     private boolean initializeDatabase() {
         databaseManager = new DatabaseManager(this);
         if (!databaseManager.initialize()) {
@@ -57,6 +58,7 @@ public final class ClansPlugin extends JavaPlugin {
         return true;
     }
 
+    // Carica inizializza i managers
     private void initializeManagers() {
         clanManager = new ClanManager(this);
         chatManager = new ChatManager(this);
@@ -67,16 +69,19 @@ public final class ClansPlugin extends JavaPlugin {
         logger.info("Managers inizializzati.");
     }
 
+    // Registra i comandi
     private void registerCommands() {
         new ClanCommand(this);
         logger.info("Comandi registrati.");
     }
 
+    // Inizializza il logger
     private void initializeLogger() {
         this.logger = new PluginLogger(getLogger());
         logger.info("Logger inizializzato.");
     }
 
+    // Registra i placeholders se trova PlaceHolderAPI
     private void registerPlaceholders() {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new ClanPlaceholders(this).register();
@@ -84,6 +89,7 @@ public final class ClansPlugin extends JavaPlugin {
         }
     }
 
+    // Registra i listeners
     private void registerListeners() {
         getServer().getPluginManager().registerEvents(new ClaimListener(this), this);
         getLogger().info("Listener registrati.");

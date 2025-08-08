@@ -29,9 +29,11 @@ public class InviteManager {
         startCleanupTask();
     }
 
+    // Metodo per creare l'invito
     public CompletableFuture<ClanInvite> createInvite(int clanId, UUID inviterUuid, UUID invitedUuid, String invitedName) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                // Controlla se esiste già un invito attivo per lo stesso clan e giocatore
                 if (hasActiveInvite(clanId, invitedUuid)) {
                     return null;
                 }
@@ -42,7 +44,7 @@ public class InviteManager {
                     INSERT INTO clan_invites (clan_id, inviter_uuid, invited_uuid, invited_name, expires_at)
                     VALUES (?, ?, ?, ?, ?)
                     """;
-
+                // Apre la connessione al DB per inserire l'invito dentro
                 try (Connection conn = plugin.getDatabaseManager().getConnection();
                      PreparedStatement stmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -58,12 +60,13 @@ public class InviteManager {
                         if (keys.next()) {
                             int inviteId = keys.getInt(1);
 
+                            // Crea l'invito
                             ClanInvite invite = new ClanInvite(
                                     inviteId, clanId, inviterUuid, invitedUuid,
                                     invitedName, LocalDateTime.now(), expiresAt
                             );
 
-                            // Update cache
+                            // Aggiorna la cache
                             inviteCache.put(inviteId, invite);
                             playerInvites.computeIfAbsent(invitedUuid, k -> new ArrayList<>()).add(invite);
 
@@ -81,19 +84,23 @@ public class InviteManager {
         });
     }
 
+    // Metodo per accettare l'invito
     public CompletableFuture<Boolean> acceptInvite(UUID playerUuid, int clanId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 ClanInvite invite = getActiveInvite(playerUuid, clanId);
+                // Controlla se l'ínvito esiste e non e' scaduto
                 if (invite == null || invite.isExpired()) {
                     return false;
                 }
 
+                // Query da inserire nel DB
                 String insertMemberQuery = """
                     INSERT INTO clan_members (clan_id, player_uuid, player_name, role)
                     VALUES (?, ?, ?, 'MEMBER')
                     """;
 
+                // Query da eliminare nel db
                 String deleteInviteQuery = "DELETE FROM clan_invites WHERE id = ?";
 
                 try (Connection conn = plugin.getDatabaseManager().getConnection()) {
@@ -111,12 +118,13 @@ public class InviteManager {
                         stmt.executeUpdate();
                     }
 
+                    // Committa le modifiche al DB
                     conn.commit();
 
-                    // Update caches
+                    // Aggiorna la cache
                     removeInviteFromCache(invite);
 
-                    // Reload clan data
+                    // e ricarica i dati del clan dal DB
                     plugin.getClanManager().reloadClan(clanId);
 
                     return true;

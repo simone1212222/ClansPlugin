@@ -22,7 +22,9 @@ public class ConfigManager {
         this.logger = plugin.getPluginLogger();
     }
 
+    // Carica il config.yml e lo salva in config
     public void loadConfig() {
+        // Trova il config e se non esiste lo crea
         File configFile = new File(plugin.getDataFolder(), "config.yml");
 
         if (!configFile.exists()) {
@@ -30,8 +32,9 @@ public class ConfigManager {
         }
 
         config = YamlConfiguration.loadConfiguration(configFile);
-
+        // Carica il config di default (quello dentro il jar) per usare le key di default
         InputStream defaultStream = plugin.getResource("config.yml");
+        // Carica il config default in memoria per usarlo come fallback
         if (defaultStream != null) {
             YamlConfiguration defaultConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(defaultStream));
             config.setDefaults(defaultConfig);
@@ -41,6 +44,7 @@ public class ConfigManager {
             }
         }
 
+        // Ricarica il config dal file config.yml
     public void reloadConfig() {
         plugin.reloadConfig();
         this.config = plugin.getConfig();

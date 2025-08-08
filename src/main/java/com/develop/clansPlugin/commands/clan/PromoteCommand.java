@@ -22,6 +22,7 @@ public class PromoteCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length < 1) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan promote <player>");
@@ -32,34 +33,39 @@ public class PromoteCommand extends BaseCommand {
             return true;
         }
 
+        // Controlla che il player sia nel clan
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return true;
         }
 
+        // Controlla che il player sia il leader del clan
         if (!clan.isLeader(player.getUniqueId())) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-leader"));
             return true;
         }
 
+        // Prende il targetMember
         ClanMember targetMember = clan.getMembers().values().stream()
                 .filter(m -> m.getPlayerName().equalsIgnoreCase(args[0]))
                 .findFirst()
                 .orElse(null);
 
-
+        // Controlla se non e' nullo
         if (targetMember == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("player-not-found"));
             return true;
         }
 
+        // Controlla che il player non ha selezionato se stesso
         if (targetMember.getPlayerUuid().equals(player.getUniqueId())) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§cSei già il leader del clan.");
             return true;
         }
 
+        // Controlla che il player non ha selezionato un officer
         if (targetMember.getRole() == ClanRole.OFFICER) {
             player.sendMessage(plugin.getConfigManager().getMessage("already-officer",
                     "%role%", ClanRole.OFFICER.getDisplayName(),
@@ -67,11 +73,13 @@ public class PromoteCommand extends BaseCommand {
             return true;
         }
 
+        // Promuove il targetMember
         CompletableFuture<Boolean> future = plugin.getClanManager()
                 .promoteMember(clan.getId(), targetMember.getPlayerUuid(), ClanRole.OFFICER);
 
         future.thenAccept(success -> {
             if (success) {
+                // Notifica i membri del player promosso
                 for (ClanMember clanMember : clan.getOnlineMembers()) {
                     Player memberPlayer = clanMember.getPlayer();
                     if (memberPlayer != null) {

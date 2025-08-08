@@ -13,29 +13,32 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChatManager {
 
     private final ClansPlugin plugin;
-    private final Set<UUID> spyPlayers;
 
     public ChatManager(ClansPlugin plugin) {
         this.plugin = plugin;
-        this.spyPlayers = ConcurrentHashMap.newKeySet();
     }
 
     public void sendClanMessage(Player sender, String message) {
+        // Controlla se il player che ha inviato il comando e' in un clan
         Clan clan = plugin.getClanManager().getPlayerClan(sender.getUniqueId());
         if (clan == null) {
             sender.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return;
         }
 
+        // Ottiene il formato e il prefix del messaaggio
         String format = plugin.getConfigManager().getChatFormat();
         String prefix = plugin.getConfigManager().getChatPrefix();
 
+        // Formatta per inviare il messaggio al clan
         format = format.replace("%player%", sender.getName());
         format = format.replace("%message%", message);
         format = format.replace("%clans_player_tag%", clan.getTag());
 
+        // Traduce i colori
         String finalMessage = ChatColor.translateAlternateColorCodes('&', prefix + format);
 
+        // Invia il messaggio a tutti i membri online del clan
         for (ClanMember member : clan.getMembers().values()) {
             Player memberPlayer = member.getPlayer();
             if (memberPlayer != null && memberPlayer.isOnline()) {
@@ -43,14 +46,6 @@ public class ChatManager {
             }
         }
 
-        if (!plugin.getConfigManager().isSpyEnabled()) {
-            for (UUID spyUuid : spyPlayers) {
-                Player spyPlayer = plugin.getServer().getPlayer(spyUuid);
-                if (spyPlayer != null && spyPlayer.isOnline() && !clan.hasMember(spyUuid)) {
-                    spyPlayer.sendMessage("§8[SPY] " + finalMessage);
-                }
-            }
-        }
     }
 
 }

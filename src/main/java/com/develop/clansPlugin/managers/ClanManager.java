@@ -63,7 +63,7 @@ public class ClanManager {
             while (rs.next()) {
                 int clanId = rs.getInt("id");
 
-                // Create the clan if not exists
+                // Crea il clan se non esiste
                 if (!clans.containsKey(clanId)) {
                     Clan clan = new Clan(
                             clanId,
@@ -73,7 +73,7 @@ public class ClanManager {
                             rs.getTimestamp("created_at").toLocalDateTime()
                     );
 
-                    // Set home if exists
+                    // Set home se esiste
                     String homeWorld = rs.getString("home_world");
                     if (homeWorld != null) {
                         Location home = new Location(
@@ -90,7 +90,7 @@ public class ClanManager {
                     clans.put(clanId, clan);
                 }
 
-                // Add member if exists
+                // Aggiungi i membri se esiste
                 int memberId = rs.getInt("member_id");
                 if (memberId > 0) {
                     ClanMember member = new ClanMember(
@@ -105,7 +105,7 @@ public class ClanManager {
                 }
             }
 
-            // Update caches
+            // Aggiorna la cache
             clanCache.clear();
             playerClanCache.clear();
             clanNameCache.clear();
@@ -126,15 +126,15 @@ public class ClanManager {
     public CompletableFuture<Clan> createClan(String name, String tag, Player leader) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                // Validation
+                // Verifica se esiste: il nome, il tag e il leader del clan
                 if (clanNameExists(name)) {
-                    return null; // Name taken
+                    return null;
                 }
                 if (clanTagExists(tag)) {
-                    return null; // Tag taken
+                    return null;
                 }
                 if (getPlayerClan(leader.getUniqueId()) != null) {
-                    return null; // Already in clan
+                    return null;
                 }
 
                 String insertClanQuery = """
@@ -200,6 +200,7 @@ public class ClanManager {
     }
 
     public CompletableFuture<Boolean> disbandClan(int clanId) {
+        // Rimuove completamente il clan dal DB e aggiorna le cache interne
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String query = "DELETE FROM clans WHERE id = ?";
@@ -234,6 +235,7 @@ public class ClanManager {
     }
 
     public CompletableFuture<Boolean> setHome(int clanId, Location home) {
+        // Aggiorna la home nel DB e aggiorna la cache interna
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String updateQuery = """
@@ -270,6 +272,7 @@ public class ClanManager {
     }
 
     public void reloadClan(int clanId) {
+        // Ricarica i dati del clan dal DB e aggiorna la cache interna
         CompletableFuture.runAsync(() -> {
             try {
                 String query = """
@@ -350,6 +353,7 @@ public class ClanManager {
     }
 
     public CompletableFuture<Boolean> kickMember(int clanId, UUID playerUuid) {
+        // Rimuove il membro dal DB e aggiorna le cache interne
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String deleteQuery = "DELETE FROM clan_members WHERE clan_id = ? AND player_uuid = ?";
@@ -381,6 +385,7 @@ public class ClanManager {
     }
 
     public CompletableFuture<Boolean> promoteMember(int clanId, UUID playerUuid, ClanRole newRole) {
+        // Aggiorna il ruolo del membro nel database e nella cache
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String updateQuery = "UPDATE clan_members SET role = ? WHERE clan_id = ? AND player_uuid = ?";

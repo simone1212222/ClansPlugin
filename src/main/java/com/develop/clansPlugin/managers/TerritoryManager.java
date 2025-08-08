@@ -36,6 +36,7 @@ public class TerritoryManager {
         });
     }
 
+    // Carica tutti i territori dal database e li inserisce nella cache
     private void loadAllTerritories() {
         String query = """
             SELECT * FROM territories ORDER BY clan_id, id
@@ -45,6 +46,7 @@ public class TerritoryManager {
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
+            // Pulizia della cache
             territoryCache.clear();
             clanTerritories.clear();
             worldTerritories.clear();
@@ -60,7 +62,7 @@ public class TerritoryManager {
                         rs.getTimestamp("claimed_at").toLocalDateTime(),
                         UUID.fromString(rs.getString("claimed_by"))
                 );
-
+                // Inserisce la cache nel DB
                 territoryCache.put(territory.id(), territory);
 
                 clanTerritories.computeIfAbsent(territory.clanId(), k -> new ArrayList<>()).add(territory);
@@ -72,10 +74,12 @@ public class TerritoryManager {
         }
     }
 
+    // Metodo per claimare i territori
     public CompletableFuture<Territory> claimTerritory(int clanId, Location location, UUID claimedBy) {
         return CompletableFuture.supplyAsync(() -> {
             try {
 
+                // Controlla il limite dei territori del clan
                 List<Territory> clanTerritoryList = getClanTerritories(clanId);
                 if (clanTerritoryList.size() >= plugin.getConfigManager().getMaxTerritories()) {
                     return null;
@@ -84,6 +88,7 @@ public class TerritoryManager {
                 int radius = plugin.getConfigManager().getTerritorySize();
                 int minDistance = plugin.getConfigManager().getMinDistance();
 
+                // Controllo distanza minima da territori esistenti nello stesso mondo
                 for (Territory existing : getTerritoriesInWorld(Objects.requireNonNull(location.getWorld()).getName())) {
                     double distance = Math.sqrt(Math.pow(location.getX() - existing.centerX(), 2) +
                             Math.pow(location.getZ() - existing.centerZ(), 2));
@@ -92,7 +97,7 @@ public class TerritoryManager {
                         return null;
                     }
                 }
-
+                // Query da inserire nel DB
                 String insertQuery = """
                         INSERT INTO territories (clan_id, world, center_x, center_z, radius, claimed_by)
                         VALUES (?, ?, ?, ?, ?, ?)
@@ -108,6 +113,7 @@ public class TerritoryManager {
                     stmt.setInt(5, radius);
                     stmt.setString(6, claimedBy.toString());
 
+                    // Updata i dati
                     stmt.executeUpdate();
 
                     try (ResultSet keys = stmt.getGeneratedKeys()) {
@@ -119,7 +125,7 @@ public class TerritoryManager {
                                     location.getBlockX(), location.getBlockZ(), radius,
                                     LocalDateTime.now(), claimedBy
                             );
-
+                            // Inserisce la cache nel DB
                             territoryCache.put(territoryId, territory);
                             clanTerritories.computeIfAbsent(clanId, k -> new ArrayList<>()).add(territory);
                             worldTerritories.computeIfAbsent(location.getWorld().getName(), k -> new ArrayList<>()).add(territory);
@@ -136,19 +142,22 @@ public class TerritoryManager {
         });
     }
 
+    // Metodo per unclaiamre il territorio
     public CompletableFuture<Boolean> unclaimTerritory(int territoryId) {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                // Query da rimuovere dal DB
                 String deleteQuery = "DELETE FROM territories WHERE id = ?";
 
                 try (Connection conn = plugin.getDatabaseManager().getConnection();
                      PreparedStatement stmt = conn.prepareStatement(deleteQuery)) {
 
                     stmt.setInt(1, territoryId);
+                    // Update i dati
                     boolean success = stmt.executeUpdate() > 0;
 
                     if (success) {
-                        // Remove from caches
+                        // Rimuove dalla cache
                         Territory territory = territoryCache.remove(territoryId);
                         if (territory != null) {
                             List<Territory> clanList = clanTerritories.get(territory.clanId());

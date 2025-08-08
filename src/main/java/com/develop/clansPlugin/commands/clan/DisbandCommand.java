@@ -21,26 +21,31 @@ public class DisbandCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length > 0) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan disband");
             return true;
         }
 
+        // Controlla se il membro e' nel clan
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return true;
         }
 
+        // Controlla se il player e' il leader del clan'
         if (!clan.isLeader(player.getUniqueId())) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-leader"));
             return true;
         }
 
+        // Disbanda il clan
         CompletableFuture<Boolean> future = plugin.getClanManager().disbandClan(clan.getId());
         future.thenAccept(success -> {
             if (success) {
+                // Notifica i membri del clan che il clan e' stato disbandato
                 for (ClanMember member : clan.getMembers().values()) {
                     Player memberPlayer = member.getPlayer();
                     if (memberPlayer != null && memberPlayer.isOnline()) {

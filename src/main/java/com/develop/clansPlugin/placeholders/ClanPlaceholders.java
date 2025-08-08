@@ -32,8 +32,10 @@ public class ClanPlaceholders extends PlaceholderExpansion {
 
     @Override
     public boolean persist() {
+        // Indica a PlaceholderAPI di mantenere registrata l'espansione anche se il plugin viene ricaricato
         return true;
     }
+
 
     @Override
     public String onPlaceholderRequest(Player player, @NotNull String params) {
@@ -43,6 +45,7 @@ public class ClanPlaceholders extends PlaceholderExpansion {
 
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
 
+        // Gestione placeholders con switch case
         return switch (params.toLowerCase()) {
             case "player_clan" -> clan != null ? clan.getName() : "";
             case "player_tag" -> clan != null ? clan.getTag() : "";
@@ -53,6 +56,7 @@ public class ClanPlaceholders extends PlaceholderExpansion {
                 }
                 yield "";
             }
+            case "clan_members_online" -> clan != null ? String.valueOf(clan.getOnlineMemberCount()) : "";
             default -> null;
         };
     }

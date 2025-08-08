@@ -23,6 +23,7 @@ public class KickCommand extends BaseCommand {
         Player player = (Player) sender;
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length < 1) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan kick <player>");
@@ -33,11 +34,13 @@ public class KickCommand extends BaseCommand {
             return true;
         }
 
+        // Controlla che il player e' nel clan
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return true;
         }
 
+        // Controlla che e' almeno officer
         ClanMember member = clan.getMember(player.getUniqueId());
         if (!member.canKick()) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-officer"));
@@ -45,12 +48,13 @@ public class KickCommand extends BaseCommand {
         }
 
         String targetNameInput = args[0];
-
+        // Prende targetMember
         ClanMember targetMember = clan.getMembers().values().stream()
                 .filter(m -> m.getPlayerName().equalsIgnoreCase(targetNameInput))
                 .findFirst()
                 .orElse(null);
 
+        // Controlla se targetMember esiste
         if (targetMember == null) {
                 player.sendMessage(plugin.getConfigManager().getMessage("player-not-found"));
                 return true;
@@ -59,11 +63,13 @@ public class KickCommand extends BaseCommand {
         UUID targetUuid = targetMember.getPlayerUuid();
         String targetName = targetMember.getPlayerName();
 
+        // Controlla se il player e' nel suo clan
         if (!clan.hasMember(targetUuid)) {
             player.sendMessage(plugin.getConfigManager().getMessage("player-not-in-your-clan"));
             return true;
         }
 
+        // Controlla se il player ha i diritti per esplerre
         if (!member.getRole().canKick(targetMember.getRole())) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-enough-rights"));
             return true;
@@ -71,12 +77,13 @@ public class KickCommand extends BaseCommand {
 
         final Player targetPlayer = plugin.getServer().getPlayer(targetUuid);
 
+        // Espelle il giocatore
         CompletableFuture<Boolean> future = plugin.getClanManager()
                 .kickMember(clan.getId(), targetUuid);
 
-
         future.thenAccept(success -> {
             if (success) {
+                // Invia ai membri del clan la notifica del kick
                 for (ClanMember clanMember : clan.getOnlineMembers()) {
                     Player memberPlayer = clanMember.getPlayer();
                     if (memberPlayer != null) {
@@ -84,7 +91,7 @@ public class KickCommand extends BaseCommand {
                                 "%player%", targetName));
                     }
                 }
-
+                // Se esiste il targetPlayer gli invia il messaggio del kick
                 if (targetPlayer != null) {
                     targetPlayer.sendMessage(plugin.getConfigManager().getMessage("player-got-kicked",
                             "%clan%", clan.getName()));

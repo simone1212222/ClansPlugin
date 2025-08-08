@@ -21,12 +21,14 @@ public class CreateCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length > 2) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan create <name> <tag>");
             return true;
         }
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length < 2) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan create <name> <tag>");
@@ -36,36 +38,43 @@ public class CreateCommand extends BaseCommand {
         String name = args[0];
         String tag = args[1];
 
+        // Controlla lunghezza nome clan
         if (name.length() > plugin.getConfigManager().getMaxNameLength()) {
             player.sendMessage(plugin.getConfigManager().getMessage("invalid-name"));
             return true;
         }
 
+        // Controllo lunghezza tag
         if (tag.length() > plugin.getConfigManager().getMaxTagLength()) {
             player.sendMessage(plugin.getConfigManager().getMessage("invalid-tag"));
             return true;
         }
 
+        // Controlla se ci sono solo lettere, numeri o underscore
         if (!name.matches("[a-zA-Z0-9_]+")) {
             player.sendMessage(plugin.getConfigManager().getMessage("invalid-name"));
             return true;
         }
 
+        // Controlla se ci sono solo lettere, numeri o underscore
         if (!tag.matches("[a-zA-Z0-9_]+")) {
             player.sendMessage(plugin.getConfigManager().getMessage("invalid-tag"));
             return true;
         }
 
+        // Controlla che il giocatore non sia già in un clan
         if (plugin.getClanManager().getPlayerClan(player.getUniqueId()) != null) {
             player.sendMessage(plugin.getConfigManager().getMessage("already-in-clan"));
             return true;
         }
-
+        // Crea il clan
         CompletableFuture<Clan> future = plugin.getClanManager().createClan(name, tag, player);
         future.thenAccept(clan -> {
             if (clan == null) {
+                // Se il clan e' nullo, invia messaggio dell'errore
                 player.sendMessage(plugin.getConfigManager().getMessage("clan-name-or-tag-taken"));
             } else {
+                // Invia messaggio del clan created
                 player.sendMessage(plugin.getConfigManager().getMessage("clan-created",
                         "%clan%", clan.getName()));
             }

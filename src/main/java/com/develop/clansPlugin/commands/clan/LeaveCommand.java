@@ -21,31 +21,37 @@ public class LeaveCommand extends BaseCommand {
 
         Player player = (Player) sender;
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length > 0) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan leave");
             return true;
         }
 
+        // Controlla se il giocatore e' in un clan
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return true;
         }
 
+        // Controlla se il giocatore non e' il leader del clan'
         if (clan.isLeader(player.getUniqueId())) {
-            player.sendMessage(plugin.getConfigManager().getMessage("prefix"));
+            player.sendMessage(plugin.getConfigManager().getMessage("cant-leave-as-leader"));
             return true;
         }
 
+        // Caccia il player che ha eseguito il comando
         CompletableFuture<Boolean> future = plugin.getClanManager()
                 .kickMember(clan.getId(), player.getUniqueId());
 
         future.thenAccept(success -> {
             if (success) {
+                // Notifica al player che ha lasciato il clan
                 player.sendMessage(plugin.getConfigManager().getMessage("player-left",
                         "%player%", player.getName()));
 
+                // Notifica i membri del clan che il player ha lasciato il clan
                 for (ClanMember member : clan.getOnlineMembers()) {
                     Player memberPlayer = member.getPlayer();
                     if (memberPlayer != null && !memberPlayer.equals(player)) {

@@ -21,19 +21,23 @@ public class ClanInfoCommand extends BaseCommand {
         Player player = (Player) sender;
         Clan clan;
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length > 1) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usa: /clan info <clan>");
             return true;
         }
 
+        // Se viene specificato un nome di clan, lo cerca per nome
         if (args.length > 0) {
+            // Se il clan non esiste, invia un messaggio di errore
             clan = plugin.getClanManager().getClanByName(args[0]);
             if (clan == null) {
                 sender.sendMessage(plugin.getConfigManager().getMessage("clan-not-found"));
                 return true;
             }
         } else {
+            // Se il player non e' in un clan, invia un messaggio di errore
             clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
             if (clan == null) {
                 sender.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
@@ -41,8 +45,7 @@ public class ClanInfoCommand extends BaseCommand {
             }
         }
 
-
-
+        // Invia le informazioni base del clan
         player.sendMessage("§6=== Clan Info: " + clan.getName() + " ===");
         player.sendMessage("§7Tag: §f[" + clan.getTag() + "]");
         player.sendMessage("§7Members: §f" + clan.getTotalMemberCount() +
@@ -59,7 +62,6 @@ public class ClanInfoCommand extends BaseCommand {
         }
         return true;
     }
-
 
 
     @Override

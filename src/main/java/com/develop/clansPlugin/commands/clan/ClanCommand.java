@@ -10,13 +10,14 @@ import java.util.*;
 
 public class ClanCommand extends BaseCommand {
 
+    // Map che trova il nome del subcommand
     private final Map<String, BaseCommand> subCommands = new HashMap<>();
 
     public ClanCommand(ClansPlugin plugin) {
         super(plugin);
         register("clan");
 
-        // Register subcommands
+        // Registra i subcommands
         subCommands.put("create", new CreateCommand(plugin));
         subCommands.put("disband", new DisbandCommand(plugin));
         subCommands.put("sethome", new SetHomeCommand(plugin));
@@ -42,7 +43,7 @@ public class ClanCommand extends BaseCommand {
             sender.sendMessage("Questo comando può essere eseguito solo da un giocatore.");
             return true;
         }
-
+        // Se fa solo /clan gli invia il menu di comandi
         if (args.length == 0) {
             sender.sendMessage("§6=== Comandi Clan ===");
             sender.sendMessage("§7/clan create <nome> <tag> §f- Crea un nuovo clan");
@@ -59,10 +60,9 @@ public class ClanCommand extends BaseCommand {
             sender.sendMessage("§7/clan leave §f- Lascia il clan corrente");
             sender.sendMessage("§7/clan settings [build/pvp/mobs] [true/false] §f- Imposta i settings del clan");
 
-
             return true;
         }
-
+        // args e' piu' di 1
         String sub = args[0].toLowerCase();
         BaseCommand subCommand = subCommands.get(sub);
 
@@ -70,13 +70,15 @@ public class ClanCommand extends BaseCommand {
             sender.sendMessage("Comando non trovato");
             return true;
         }
-
+        // Esegue il subcommands
         return subCommand.executeCommand(sender, Arrays.copyOfRange(args, 1, args.length));
     }
 
+    // TabComplete per i subcommands
     @Override
     public List<String> onTabCompleteCommand(CommandSender sender, String[] args) {
         if (args.length == 1) {
+            // Suggerisce i subcommands
             return subCommands.keySet().stream()
                     .filter(s -> s.startsWith(args[0].toLowerCase()))
                     .toList();

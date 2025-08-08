@@ -21,6 +21,7 @@ public class InviteCommand extends BaseCommand{
     public boolean executeCommand(CommandSender sender, String[] args) {
         Player player = (Player) sender;
 
+        // Controlla l'utilizzo corretto degli args del comando
         if (args.length > 2) {
             player.sendMessage(plugin.getConfigManager().getMessage("prefix") +
                     "§8Usage: /clan invite <player>");
@@ -31,37 +32,45 @@ public class InviteCommand extends BaseCommand{
             return true;
         }
 
+        // Controlla se il player e' nel clan
         Clan clan = plugin.getClanManager().getPlayerClan(player.getUniqueId());
         if (clan == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-in-clan"));
             return true;
         }
 
+        // Contro se il player e' almeno officer
         ClanMember member = clan.getMember(player.getUniqueId());
         if (!member.canInvite()) {
             player.sendMessage(plugin.getConfigManager().getMessage("not-officer"));
         }
 
+        // Controlla se il player esiste
         Player target = plugin.getServer().getPlayer(args[0]);
         if (target == null) {
             player.sendMessage(plugin.getConfigManager().getMessage("player-not-found"));
             return true;
         }
 
+        // Contro se non e' gia' in un clan
         if (plugin.getClanManager().getPlayerClan(target.getUniqueId()) != null) {
             player.sendMessage(plugin.getConfigManager().getMessage("already-in-clan"));
             return true;
         }
 
+        // Invita il player
         CompletableFuture<ClanInvite> future = plugin.getInviteManager()
                 .createInvite(clan.getId(), player.getUniqueId(), target.getUniqueId(), target.getName());
 
         future.thenAccept(invite -> {
             if (invite == null) {
+                // Se l'invito e' stato creato, invia un messaggio di errore al player
                 player.sendMessage(plugin.getConfigManager().getMessage("already-invited"));
             } else {
+                // Senno invia il messaggio al player che ha inviato il membro al clan
                 player.sendMessage(plugin.getConfigManager().getMessage("invite-sent",
                         "%player%", target.getName()));
+                // E lo invia anche al membro invitato
                 target.sendMessage(plugin.getConfigManager().getMessage("invite-received",
                         "%clan%", clan.getName()));
             }
